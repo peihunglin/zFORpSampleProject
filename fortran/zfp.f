@@ -1,12 +1,13 @@
 module zFORp_module
 
-  use, intrinsic :: iso_c_binding, only: c_int, c_size_t, c_ptr, c_null_ptr
+  use, intrinsic :: iso_c_binding, only: c_int, c_size_t, c_intptr_t, c_ptr, c_null_ptr
   implicit none
   private
 
   type zFORp_bitstream_type
     private
     type(c_ptr) :: object = c_null_ptr
+    integer(c_size_t) :: bufferSizeBytes
   end type zFORp_bitstream_type
 
   interface
@@ -16,7 +17,7 @@ module zFORp_module
       import
       type(c_ptr), value :: buffer
       integer(c_size_t), value :: bufferSizeBytes
-      type(c_ptr) :: bitstream
+      integer(c_intptr_t) :: bitstream
     end function zfp_bitstream_stream_open
 
     subroutine zfp_bitstream_stream_close(bitstream) bind(c, name="stream_close")
@@ -52,12 +53,11 @@ module zFORp_module
 contains
 
 ! Fortran wrapper routines to interface C wrappers
-
   function zFORp_bitstream_stream_open(buffer, bufferSizeBytes) result(bitstream)
     implicit none
-    type(zFORp_bitstream_type) :: bitstream
     type(c_ptr), intent(in) :: buffer
     integer, intent(in) :: bufferSizeBytes
+    integer(c_intptr_t) :: bitstream
 
     bitstream%object = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
   end function zFORp_bitstream_stream_open
