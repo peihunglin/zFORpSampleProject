@@ -59,7 +59,7 @@ contains
     integer, intent(in) :: bufferSizeBytes
     integer(c_intptr_t) :: bitstream
 
-    bitstream%object = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
+    bitstream = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
   end function zFORp_bitstream_stream_open
 
   subroutine zFORp_bitstream_stream_close(bitstream)
