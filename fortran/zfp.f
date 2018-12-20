@@ -4,7 +4,7 @@ module zFORp_module
   implicit none
   private
 
-  type zFORp_bitstream_type
+  type, bind(c) :: zFORp_bitstream_type
     private
     type(c_ptr) :: object = c_null_ptr
     integer(c_size_t) :: bufferSizeBytes
@@ -37,6 +37,12 @@ module zFORp_module
       integer(c_size_t) :: bufferSize
     end subroutine
 
+    subroutine zfp_dump_c_pointer(ptr1, ptr2) bind(c, name="dump_c_ptr")
+      import
+      type(c_ptr), value :: ptr1
+      type(c_ptr) :: ptr2
+    end subroutine
+
   end interface
 
   ! type
@@ -46,6 +52,7 @@ module zFORp_module
   ! functions
 
   public :: zFORp_bitstream_stream_open, &
+            zFORp_bitstream_stream_open_test, &
             zFORp_bitstream_stream_close, &
             zFORp_bitstream_stream_buffer_size, &
             zFORp_bitstream_stream_set_buffer_size
@@ -53,23 +60,41 @@ module zFORp_module
 contains
 
 ! Fortran wrapper routines to interface C wrappers
-  function zFORp_bitstream_stream_open(buffer, bufferSizeBytes) result(bitstream)
+  function zFORp_bitstream_stream_open(buffer, bufferSizeBytes) result(bitstream) &
+    bind(c,name="zforp_bitstream_stream_open")
     implicit none
     type(c_ptr), intent(in) :: buffer
     integer, intent(in) :: bufferSizeBytes
     integer(c_intptr_t) :: bitstream
 
+    print *, "inside zFORp_bitstream_stream_open, buffer passed by address"
+    call zfp_dump_c_pointer(buffer, buffer)
     bitstream = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
   end function zFORp_bitstream_stream_open
 
-  subroutine zFORp_bitstream_stream_close(bitstream)
+  function zFORp_bitstream_stream_open_test(buffer, bufferSizeBytes) result(bitstream) &
+    bind(c,name="zforp_bitstream_stream_open_test")
+    implicit none
+    type(c_ptr), intent(in),value :: buffer
+    integer, intent(in) :: bufferSizeBytes
+    integer(c_intptr_t) :: bitstream
+
+    print *, "inside zFORp_bitstream_stream_open_test, buffer passed by value"
+    call zfp_dump_c_pointer(buffer, buffer)
+
+    bitstream = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
+  end function zFORp_bitstream_stream_open_test
+
+  subroutine zFORp_bitstream_stream_close(bitstream) & 
+    bind(c,name="zforp_bitstream_stream_close")
     type(zFORp_bitstream_type), intent(inout) :: bitstream
 
     call zfp_bitstream_stream_close(bitstream%object)
     bitstream%object = c_null_ptr
   end subroutine zFORp_bitstream_stream_close
 
-  function zFORp_bitstream_stream_buffer_size(bitstream) result(bufferSize)
+  function zFORp_bitstream_stream_buffer_size(bitstream) result(bufferSize) &
+    bind(c,name="zforp_bitstream_buffer_size")
     implicit none
     type(zFORp_bitstream_type), intent(in) :: bitstream
     integer :: bufferSize
@@ -77,7 +102,8 @@ contains
     bufferSize = zfp_bitstream_stream_buffer_size(bitstream%object)
   end function zFORp_bitstream_stream_buffer_size
 
-  subroutine zFORp_bitstream_stream_set_buffer_size(bitstream, bufferSize)
+  subroutine zFORp_bitstream_stream_set_buffer_size(bitstream, bufferSize) &
+    bind(c,name="zforp_bitstream_set_buffer_size")
     type(zFORp_bitstream_type), intent(inout) :: bitstream
     integer, intent(in) :: bufferSize
 
