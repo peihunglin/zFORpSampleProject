@@ -13,11 +13,13 @@ struct bitstream {
 bitstream*
 stream_open(void* buffer, size_t bufferSizeBytes)
 {
+  printf("C buffer pointer in C API: %p\n", buffer);
   bitstream* stream = (bitstream*)malloc(sizeof(bitstream));
   if (stream) {
     stream->buffer = buffer;
     stream->bufferSizeBytes = bufferSizeBytes;
   }
+  printf("C stream pointer in C API: %p\n", stream);
   return stream;
 }
 
@@ -45,3 +47,9 @@ stream_set_buffer_size(bitstream* stream, size_t bufferSizeBytes)
     stream->bufferSizeBytes = bufferSizeBytes;
   }
 }
+
+void dump_c_ptr(void* ptr1, void* ptr2)
+{
+  printf("C pointer value in C API by value: %p by address: %p\n", ptr1, ptr2);
+}
+
