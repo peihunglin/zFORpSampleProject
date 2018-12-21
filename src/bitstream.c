@@ -23,6 +23,12 @@ stream_open(void* buffer, size_t bufferSizeBytes)
   return stream;
 }
 
+bitstream*
+stream_open_default()
+{
+  return (bitstream*)calloc(1, sizeof(bitstream));
+}
+
 /* close and deallocate bit stream */
 void
 stream_close(bitstream* stream)

@@ -17,8 +17,13 @@ module zFORp_module
       import
       type(c_ptr), value :: buffer
       integer(c_size_t), value :: bufferSizeBytes
-      integer(c_intptr_t) :: bitstream
+      type(c_ptr) :: bitstream
     end function zfp_bitstream_stream_open
+
+    function zfp_bitstream_stream_open_default() result(bitstream) bind(c, name="stream_open_default")
+      import
+      type(c_ptr) :: bitstream
+    end function zfp_bitstream_stream_open_default
 
     subroutine zfp_bitstream_stream_close(bitstream) bind(c, name="stream_close")
       import
@@ -52,6 +57,7 @@ module zFORp_module
   ! functions
 
   public :: zFORp_bitstream_stream_open, &
+            zFORp_bitstream_stream_open_default, &
             zFORp_bitstream_stream_open_test, &
             zFORp_bitstream_stream_close, &
             zFORp_bitstream_stream_buffer_size, &
@@ -65,24 +71,44 @@ contains
     implicit none
     type(c_ptr), intent(in) :: buffer
     integer, intent(in) :: bufferSizeBytes
-    integer(c_intptr_t) :: bitstream
+    type(zFORp_bitstream_type) :: bitstream
 
     print *, "inside zFORp_bitstream_stream_open, buffer passed by address"
     call zfp_dump_c_pointer(buffer, buffer)
-    bitstream = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
+    bitstream%object = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
   end function zFORp_bitstream_stream_open
+
+  subroutine zFORp_bitstream_stream_open_subroutine(bitstream, buffer, bufferSizeBytes) &
+    bind(c,name="zforp_bitstream_stream_open_subroutine")
+    implicit none
+    type(c_ptr), intent(in) :: buffer
+    integer, intent(in) :: bufferSizeBytes
+    type(zFORp_bitstream_type), intent(inout) :: bitstream
+
+    print *, "inside zFORp_bitstream_stream_open_subroutine, buffer passed by address"
+    call zfp_dump_c_pointer(buffer, buffer)
+    bitstream%object = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
+  end subroutine zFORp_bitstream_stream_open_subroutine
+
+  function zFORp_bitstream_stream_open_default() result(bitstream) &
+    bind(c,name="zforp_bitstream_stream_open_default")
+    implicit none
+    type(zFORp_bitstream_type) :: bitstream
+
+    bitstream%object = zfp_bitstream_stream_open_default()
+  end function zFORp_bitstream_stream_open_default
 
   function zFORp_bitstream_stream_open_test(buffer, bufferSizeBytes) result(bitstream) &
     bind(c,name="zforp_bitstream_stream_open_test")
     implicit none
     type(c_ptr), intent(in),value :: buffer
     integer, intent(in) :: bufferSizeBytes
-    integer(c_intptr_t) :: bitstream
+    type(zFORp_bitstream_type) :: bitstream
 
     print *, "inside zFORp_bitstream_stream_open_test, buffer passed by value"
     call zfp_dump_c_pointer(buffer, buffer)
 
-    bitstream = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
+    bitstream%object = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
   end function zFORp_bitstream_stream_open_test
 
   subroutine zFORp_bitstream_stream_close(bitstream) & 

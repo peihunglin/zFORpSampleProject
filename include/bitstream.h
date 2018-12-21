@@ -7,6 +7,8 @@ typedef struct bitstream bitstream;
 
 bitstream* stream_open(void* buffer, size_t bufferSizeBytes);
 
+bitstream* stream_open_default();
+
 void stream_close(bitstream* stream);
 
 size_t stream_buffer_size(const bitstream* stream);
