@@ -39,11 +39,7 @@ stream_close(bitstream* stream)
 size_t
 stream_buffer_size(const bitstream* stream)
 {
-  if (stream) {
-    return stream->bufferSizeBytes;
-  }
-
-  return 0;
+  return stream ? stream->bufferSizeBytes : 0;
 }
 
 void
@@ -51,6 +47,20 @@ stream_set_buffer_size(bitstream* stream, size_t bufferSizeBytes)
 {
   if(stream) {
     stream->bufferSizeBytes = bufferSizeBytes;
+  }
+}
+
+void*
+stream_buffer_ptr(const bitstream* stream)
+{
+  return stream ? stream->buffer : NULL;
+}
+
+void
+stream_set_buffer_ptr(bitstream* stream, void* bufferPtr)
+{
+  if (stream) {
+    stream->buffer = bufferPtr;
   }
 }
 

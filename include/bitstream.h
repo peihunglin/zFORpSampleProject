@@ -15,4 +15,8 @@ size_t stream_buffer_size(const bitstream* stream);
 
 void stream_set_buffer_size(bitstream* stream, size_t bufferSizeBytes);
 
+void* stream_buffer_ptr(const bitstream* stream);
+
+void stream_set_buffer_ptr(bitstream* stream, void* bufferPtr);
+
 #endif

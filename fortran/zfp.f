@@ -7,7 +7,6 @@ module zFORp_module
   type, bind(c) :: zFORp_bitstream_type
     private
     type(c_ptr) :: object = c_null_ptr
-    integer(c_size_t) :: bufferSizeBytes
   end type zFORp_bitstream_type
 
   interface
@@ -39,7 +38,18 @@ module zFORp_module
     subroutine zfp_bitstream_stream_set_buffer_size(bitstream, bufferSize) bind(c, name="stream_set_buffer_size")
       import
       type(c_ptr), value :: bitstream
-      integer(c_size_t) :: bufferSize
+      integer(c_size_t), value :: bufferSize
+    end subroutine
+
+    function zfp_bitstream_stream_buffer_ptr(bitstream) result(bufferPtr) bind(c, name="stream_buffer_ptr")
+      import
+      type(c_ptr), value :: bitstream
+      type(c_ptr) :: bufferPtr
+    end function
+
+    subroutine zfp_bitstream_stream_set_buffer_ptr(bitstream, bufferPtr) bind(c, name="stream_set_buffer_ptr")
+      import
+      type(c_ptr), value :: bitstream, bufferPtr
     end subroutine
 
     subroutine zfp_dump_c_pointer(ptr1, ptr2) bind(c, name="dump_c_ptr")
@@ -61,7 +71,9 @@ module zFORp_module
             zFORp_bitstream_stream_open_test, &
             zFORp_bitstream_stream_close, &
             zFORp_bitstream_stream_buffer_size, &
-            zFORp_bitstream_stream_set_buffer_size
+            zFORp_bitstream_stream_set_buffer_size, &
+            zFORp_bitstream_stream_buffer_ptr, &
+            zFORp_bitstream_stream_set_buffer_ptr
 
 contains
 
@@ -73,8 +85,6 @@ contains
     integer, intent(in) :: bufferSizeBytes
     type(zFORp_bitstream_type) :: bitstream
 
-    print *, "inside zFORp_bitstream_stream_open, buffer passed by address"
-    call zfp_dump_c_pointer(buffer, buffer)
     bitstream%object = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
   end function zFORp_bitstream_stream_open
 
@@ -85,8 +95,6 @@ contains
     integer, intent(in) :: bufferSizeBytes
     type(zFORp_bitstream_type), intent(inout) :: bitstream
 
-    print *, "inside zFORp_bitstream_stream_open_subroutine, buffer passed by address"
-    call zfp_dump_c_pointer(buffer, buffer)
     bitstream%object = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
   end subroutine zFORp_bitstream_stream_open_subroutine
 
@@ -105,9 +113,6 @@ contains
     integer, intent(in) :: bufferSizeBytes
     type(zFORp_bitstream_type) :: bitstream
 
-    print *, "inside zFORp_bitstream_stream_open_test, buffer passed by value"
-    call zfp_dump_c_pointer(buffer, buffer)
-
     bitstream%object = zfp_bitstream_stream_open(buffer, int(bufferSizeBytes, c_size_t))
   end function zFORp_bitstream_stream_open_test
 
@@ -120,7 +125,7 @@ contains
   end subroutine zFORp_bitstream_stream_close
 
   function zFORp_bitstream_stream_buffer_size(bitstream) result(bufferSize) &
-    bind(c,name="zforp_bitstream_buffer_size")
+    bind(c,name="zforp_bitstream_stream_buffer_size")
     implicit none
     type(zFORp_bitstream_type), intent(in) :: bitstream
     integer :: bufferSize
@@ -129,11 +134,28 @@ contains
   end function zFORp_bitstream_stream_buffer_size
 
   subroutine zFORp_bitstream_stream_set_buffer_size(bitstream, bufferSize) &
-    bind(c,name="zforp_bitstream_set_buffer_size")
+    bind(c,name="zforp_bitstream_stream_set_buffer_size")
     type(zFORp_bitstream_type), intent(inout) :: bitstream
     integer, intent(in) :: bufferSize
 
     call zfp_bitstream_stream_set_buffer_size(bitstream%object, int(bufferSize, c_size_t))
   end subroutine zFORp_bitstream_stream_set_buffer_size
+
+  function zFORp_bitstream_stream_buffer_ptr(bitstream) result(bufferPtr) &
+    bind(c,name="zforp_bitstream_stream_buffer_ptr")
+    implicit none
+    type(zFORp_bitstream_type), intent(in) :: bitstream
+    type(c_ptr) :: bufferPtr
+
+    bufferPtr = zfp_bitstream_stream_buffer_ptr(bitstream%object)
+  end function zFORp_bitstream_stream_buffer_ptr
+
+  subroutine zFORp_bitstream_stream_set_buffer_ptr(bitstream, bufferPtr) &
+    bind(c,name="zforp_bitstream_stream_set_buffer_ptr")
+    type(zFORp_bitstream_type), intent(inout) :: bitstream
+    type(c_ptr), intent(in) :: bufferPtr
+
+    call zfp_bitstream_stream_set_buffer_ptr(bitstream%object, bufferPtr)
+  end subroutine zFORp_bitstream_stream_set_buffer_ptr
 
 end module zFORp_module
