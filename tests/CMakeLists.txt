@@ -13,6 +13,10 @@ set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${bounds}")
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${dialect}")
 
+if(DEFINED TEST_FORTRAN)
+  add_definitions(-DTEST_FORTRAN)
+endif()
+
 add_executable(ifortBug ifortBug.c)
 target_link_libraries(ifortBug zfp zFORp)
 add_test(NAME ifortBug COMMAND ifortBug)

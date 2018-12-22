@@ -4,8 +4,16 @@
 
 #include "bitstream.h"
 
-// enables calling Fortran API (commented out below)
-#include "zFORp.h"
+#ifdef TEST_FORTRAN
+  #include "zFORp.h"
+  #define bitstream_container zforp_bitstream_type
+#else
+  typedef struct bitstream_container bitstream_container;
+  struct bitstream_container {
+    bitstream* stream;
+  };
+#endif
+
 
 int main()
 {
@@ -18,22 +26,32 @@ int main()
     return 1;
   }
 
-  bitstream* bs = stream_open(buffer, initialBufferSizeBytes);
+  bitstream_container bs;
+  bs.stream = stream_open(buffer, initialBufferSizeBytes);
 
   // test assertions
   // (would like to automatically substitute fortran wrappers in place of C API calls)
-  assert(stream_buffer_size(bs) == initialBufferSizeBytes);
-//  assert(_prefixFOR(zforp_bitstream_stream_buffer_size)(&bs) == initialBufferSizeBytes);
+
+  size_t observedBufferSizeBytes;
+#ifdef TEST_FORTRAN
+  observedBufferSizeBytes = zforp_bitstream_stream_buffer_size(&bs);
+#else
+  observedBufferSizeBytes = stream_buffer_size(bs.stream);
+#endif
+  assert(observedBufferSizeBytes == initialBufferSizeBytes);
 
   size_t newBufferSizeBytes = 11;
-  stream_set_buffer_size(bs, newBufferSizeBytes);
-//  _prefixFOR(zforp_bitstream_stream_set_buffer_size)(&bs, &newBufferSizeBytes);
-
-  assert(stream_buffer_size(bs) == newBufferSizeBytes);
-//  assert(_prefixFOR(zforp_bitstream_stream_buffer_size)(&bs) == newBufferSizeBytes);
+#ifdef TEST_FORTRAN
+  zforp_bitstream_stream_set_buffer_size(&bs, &newBufferSizeBytes);
+  observedBufferSizeBytes = zforp_bitstream_stream_buffer_size(&bs);
+#else
+  stream_set_buffer_size(bs.stream, newBufferSizeBytes);
+  observedBufferSizeBytes = stream_buffer_size(bs.stream);
+#endif
+  assert(observedBufferSizeBytes == newBufferSizeBytes);
 
   // finish, free
-  stream_close(bs);
+  stream_close(bs.stream);
   free(buffer);
 
   return 0;
